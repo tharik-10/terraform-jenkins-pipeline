@@ -1,12 +1,12 @@
 variable "region" {
-  default = "ap-south-1"
+  default = "us-east-1"
 }
 
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
 
 variable "ami_id" {
-  default = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 (Mumbai)
+  default = "ami-020cba7c55df1f615" 
 }
 
 variable "instance_type" {
