@@ -1,6 +1,14 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'ACTION',
+            choices: ['apply', 'destroy'],
+            description: 'Select whether to apply or destroy the infrastructure'
+        )
+    }
+
     environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
@@ -22,30 +30,57 @@ pipeline {
         }
 
         stage('Terraform Validate') {
+            when {
+                expression { params.ACTION == 'apply' }
+            }
             steps {
                 sh 'terraform validate'
             }
         }
 
         stage('Terraform Plan') {
+            when {
+                expression { params.ACTION == 'apply' }
+            }
             steps {
                 sh 'terraform plan -out=tfplan'
             }
         }
 
-        stage('Approval') {
+        stage('Approval Before Apply/Destroy') {
             steps {
-                input message: 'Approve to apply the infrastructure?'
+                script {
+                    if (params.ACTION == 'apply') {
+                        input message: 'Approve to APPLY the infrastructure?'
+                    } else if (params.ACTION == 'destroy') {
+                        input message: 'Approve to DESTROY the infrastructure?'
+                    }
+                }
             }
         }
 
         stage('Terraform Apply') {
+            when {
+                expression { params.ACTION == 'apply' }
+            }
             steps {
                 sh 'terraform apply tfplan'
             }
         }
 
+        stage('Terraform Destroy') {
+            when {
+                expression { params.ACTION == 'destroy' }
+            }
+            steps {
+                sh 'terraform destroy -auto-approve'
+            }
+        }
+
         stage('Output Instance Info') {
+            when {
+                expression { params.ACTION == 'apply' }
+            }
             steps {
                 sh 'terraform output'
             }
