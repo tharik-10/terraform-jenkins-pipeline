@@ -19,7 +19,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/your-username/terraform-cicd.git'
+                git 'https://github.com/tharik-10/terraform-jenkins-pipeline.git'
             }
         }
 
